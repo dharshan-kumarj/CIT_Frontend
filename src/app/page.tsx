@@ -46,24 +46,24 @@ export default function Home() {
 
             {/* Action Buttons - Less Perfect */}
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              <button className="group px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all duration-200 transform hover:-translate-y-1 shadow-lg hover:shadow-xl">
+              <a href="/vendor/dashboard" className="group px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all duration-200 transform hover:-translate-y-1 shadow-lg hover:shadow-xl text-center">
                 I'm a Vendor 👋
                 <div className="text-xs opacity-80 font-normal">Find distributors for my products</div>
-              </button>
-              <button className="group px-8 py-4 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-xl transition-all duration-200 transform hover:-translate-y-1 shadow-lg hover:shadow-xl">
+              </a>
+              <a href="/distributor/dashboard" className="group px-8 py-4 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-xl transition-all duration-200 transform hover:-translate-y-1 shadow-lg hover:shadow-xl text-center">
                 I'm a Distributor 📦
                 <div className="text-xs opacity-80 font-normal">Find products to distribute</div>
-              </button>
+              </a>
             </div>
 
             {/* Login Links - Subtle */}
             <div className="flex gap-6 text-sm">
-              <button className="text-gray-500 hover:text-orange-500 underline decoration-dotted">
+              <a href="/vendor/dashboard" className="text-gray-500 hover:text-orange-500 underline decoration-dotted">
                 Already a vendor? Sign in
-              </button>
-              <button className="text-gray-500 hover:text-orange-500 underline decoration-dotted">
+              </a>
+              <a href="/distributor/dashboard" className="text-gray-500 hover:text-orange-500 underline decoration-dotted">
                 Distributor login
-              </button>
+              </a>
             </div>
           </div>
         </section>
