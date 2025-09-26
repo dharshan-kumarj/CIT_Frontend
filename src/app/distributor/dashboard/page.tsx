@@ -1,4 +1,59 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useAuth } from '../../../lib/auth-context';
+import { apiClient } from '../../../lib/api';
+import { useRouter } from 'next/navigation';
+
 export default function DistributorDashboard() {
+  const { user, isLoggedIn, logout } = useAuth();
+  const router = useRouter();
+  const [dashboardData, setDashboardData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      router.push('/');
+      return;
+    }
+
+    if (user?.role !== 'distributor') {
+      router.push('/vendor/dashboard');
+      return;
+    }
+
+    const fetchDashboardData = async () => {
+      try {
+        const data = await apiClient.getDistributorDashboard();
+        setDashboardData(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load dashboard');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [isLoggedIn, user, router]);
+
+  if (!isLoggedIn || !user) {
+    return <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+        <p>Redirecting...</p>
+      </div>
+    </div>;
+  }
+
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+        <p>Loading dashboard...</p>
+      </div>
+    </div>;
+  }
   // Mock data for distributor dashboard
   const mockNotifications = [
     { id: 1, vendor: "TechCorp Industries", product: "Smart Home Security System", timeAgo: "2 hours ago", type: "new_request", priority: "high" },
@@ -39,7 +94,10 @@ export default function DistributorDashboard() {
                 </div>
                 <div>
                   <h1 className="text-2xl font-black text-gray-800 dark:text-white">Distributor Dashboard</h1>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Welcome back, Metro Distribution Co.</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Welcome back, {user?.name || user?.companyName || user?.email}</p>
+                  {dashboardData && (
+                    <p className="text-xs text-green-600">Connected to backend • {(dashboardData as any).timestamp ? new Date((dashboardData as any).timestamp).toLocaleTimeString() : ''}</p>
+                  )}
                 </div>
               </a>
             </div>
@@ -50,13 +108,45 @@ export default function DistributorDashboard() {
                 </button>
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
               </div>
-              <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+              <button 
+                onClick={logout}
+                className="px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-colors"
+              >
+                Logout
+              </button>
+              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-sm font-semibold text-gray-600">
+                {user?.name?.[0] || user?.email?.[0]?.toUpperCase() || 'D'}
+              </div>
             </div>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
+        {/* Error Display */}
+        {error && (
+          <div className="mb-8 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+            <h3 className="font-semibold text-red-800 dark:text-red-200">Connection Error</h3>
+            <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+            <p className="text-red-600 dark:text-red-400 text-xs mt-2">
+              Make sure the backend server is running at http://localhost:3001
+            </p>
+          </div>
+        )}
+
+        {/* Success Display */}
+        {dashboardData && (
+          <div className="mb-8 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg">
+            <h3 className="font-semibold text-green-800 dark:text-green-200">✅ Connected to Backend</h3>
+            <p className="text-green-700 dark:text-green-300 text-sm">
+              {(dashboardData as any).message || 'Successfully connected to distributor dashboard'}
+            </p>
+            <pre className="text-xs text-green-600 dark:text-green-400 mt-2 bg-green-100 dark:bg-green-800/20 p-2 rounded">
+              {JSON.stringify(dashboardData, null, 2)}
+            </pre>
+          </div>
+        )}
+
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm">

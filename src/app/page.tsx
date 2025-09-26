@@ -1,4 +1,12 @@
+'use client';
+
+import { useState } from 'react';
+import { useAuth } from '../lib/auth-context';
+import AuthForm from '../components/AuthForm';
+
 export default function Home() {
+  const [showAuth, setShowAuth] = useState(false);
+  const { isLoggedIn, user, logout } = useAuth();
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Quirky Navigation */}
@@ -12,7 +20,7 @@ export default function Home() {
               BizLink
             </h1>
           </div>
-          <div className="hidden md:flex gap-8 text-sm">
+          <div className="hidden md:flex gap-8 text-sm items-center">
             <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-orange-500 transition-colors">
               How it works
             </a>
@@ -22,6 +30,32 @@ export default function Home() {
             <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-orange-500 transition-colors">
               Support
             </a>
+            {isLoggedIn ? (
+              <div className="flex items-center gap-4">
+                <span className="text-gray-600 dark:text-gray-400">
+                  Welcome, {user?.name || user?.email}
+                </span>
+                <a 
+                  href={`/${user?.role}/dashboard`}
+                  className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                >
+                  Dashboard
+                </a>
+                <button
+                  onClick={logout}
+                  className="text-gray-600 dark:text-gray-400 hover:text-red-500 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowAuth(true)}
+                className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+              >
+                Sign In
+              </button>
+            )}
           </div>
         </div>
       </nav>
@@ -45,26 +79,43 @@ export default function Home() {
             </p>
 
             {/* Action Buttons - Less Perfect */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              <a href="/vendor/dashboard" className="group px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all duration-200 transform hover:-translate-y-1 shadow-lg hover:shadow-xl text-center">
-                I'm a Vendor 👋
-                <div className="text-xs opacity-80 font-normal">Find distributors for my products</div>
-              </a>
-              <a href="/distributor/dashboard" className="group px-8 py-4 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-xl transition-all duration-200 transform hover:-translate-y-1 shadow-lg hover:shadow-xl text-center">
-                I'm a Distributor 📦
-                <div className="text-xs opacity-80 font-normal">Find products to distribute</div>
-              </a>
-            </div>
+            {isLoggedIn ? (
+              <div className="flex flex-col sm:flex-row gap-4 mb-12">
+                <a href={`/${user?.role}/dashboard`} className="group px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all duration-200 transform hover:-translate-y-1 shadow-lg hover:shadow-xl text-center">
+                  Go to Dashboard 🚀
+                  <div className="text-xs opacity-80 font-normal">Continue where you left off</div>
+                </a>
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-col sm:flex-row gap-4 mb-12">
+                  <button 
+                    onClick={() => setShowAuth(true)}
+                    className="group px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all duration-200 transform hover:-translate-y-1 shadow-lg hover:shadow-xl text-center"
+                  >
+                    I'm a Vendor 👋
+                    <div className="text-xs opacity-80 font-normal">Find distributors for my products</div>
+                  </button>
+                  <button 
+                    onClick={() => setShowAuth(true)}
+                    className="group px-8 py-4 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-xl transition-all duration-200 transform hover:-translate-y-1 shadow-lg hover:shadow-xl text-center"
+                  >
+                    I'm a Distributor 📦
+                    <div className="text-xs opacity-80 font-normal">Find products to distribute</div>
+                  </button>
+                </div>
 
-            {/* Login Links - Subtle */}
-            <div className="flex gap-6 text-sm">
-              <a href="/vendor/dashboard" className="text-gray-500 hover:text-orange-500 underline decoration-dotted">
-                Already a vendor? Sign in
-              </a>
-              <a href="/distributor/dashboard" className="text-gray-500 hover:text-orange-500 underline decoration-dotted">
-                Distributor login
-              </a>
-            </div>
+                {/* Login Links - Subtle */}
+                <div className="flex gap-6 text-sm">
+                  <button 
+                    onClick={() => setShowAuth(true)}
+                    className="text-gray-500 hover:text-orange-500 underline decoration-dotted"
+                  >
+                    Already have an account? Sign in
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </section>
 
@@ -295,6 +346,11 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Auth Modal */}
+      {showAuth && (
+        <AuthForm onClose={() => setShowAuth(false)} />
+      )}
     </div>
   );
 }
