@@ -129,7 +129,7 @@ export default function DistributorDashboard() {
             <h3 className="font-semibold text-red-800 dark:text-red-200">Connection Error</h3>
             <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
             <p className="text-red-600 dark:text-red-400 text-xs mt-2">
-              Make sure the backend server is running at http://localhost:3001
+              Make sure the backend server is running at http://localhost:3002
             </p>
           </div>
         )}
@@ -141,9 +141,20 @@ export default function DistributorDashboard() {
             <p className="text-green-700 dark:text-green-300 text-sm">
               {(dashboardData as any).message || 'Successfully connected to distributor dashboard'}
             </p>
-            <pre className="text-xs text-green-600 dark:text-green-400 mt-2 bg-green-100 dark:bg-green-800/20 p-2 rounded">
-              {JSON.stringify(dashboardData, null, 2)}
-            </pre>
+            <div className="mt-3 space-y-2">
+              <div className="text-sm text-green-700 dark:text-green-300">
+                <strong>Real Data from Backend:</strong>
+              </div>
+              <div className="bg-green-100 dark:bg-green-800/20 p-3 rounded text-xs space-y-1">
+                <div>📊 Total Partnerships: {(dashboardData as any).stats?.totalPartnerships || 0}</div>
+                <div>🎯 Available Opportunities: {(dashboardData as any).availableRequests?.length || 0}</div>
+                <div>🎓 Training Progress: {(dashboardData as any).stats?.trainingCompletion || 0}%</div>
+                <div>🔔 Notifications: {(dashboardData as any).notifications?.length || 0}</div>
+                <div>👤 User: {(dashboardData as any).user?.firstName} {(dashboardData as any).user?.lastName}</div>
+                <div>🏢 Company: {(dashboardData as any).user?.companyName}</div>
+                <div>⏰ Last Updated: {(dashboardData as any).timestamp ? new Date((dashboardData as any).timestamp).toLocaleString() : 'N/A'}</div>
+              </div>
+            </div>
           </div>
         )}
 

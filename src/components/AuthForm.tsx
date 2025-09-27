@@ -232,22 +232,22 @@ export default function AuthForm({ onClose }: AuthFormProps) {
               <button
                 type="button"
                 onClick={() => {
-                  setFormData({ ...formData, email: 'vendor@example.com', password: 'password123' });
+                  setFormData({ ...formData, email: 'vendor1@techcorp.com', password: 'password123' });
                   setRole('vendor');
                 }}
                 className="block w-full text-left p-2 bg-blue-100 dark:bg-blue-800/30 rounded hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors"
               >
-                <strong>Vendor:</strong> vendor@example.com / password123
+                <strong>Vendor:</strong> vendor1@techcorp.com / password123
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  setFormData({ ...formData, email: 'distributor@example.com', password: 'password123' });
+                  setFormData({ ...formData, email: 'distributor1@fastdist.com', password: 'password123' });
                   setRole('distributor');
                 }}
                 className="block w-full text-left p-2 bg-blue-100 dark:bg-blue-800/30 rounded hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors"
               >
-                <strong>Distributor:</strong> distributor@example.com / password123
+                <strong>Distributor:</strong> distributor1@fastdist.com / password123
               </button>
             </div>
           </div>

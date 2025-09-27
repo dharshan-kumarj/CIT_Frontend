@@ -49,14 +49,6 @@ export default function HealthCheck() {
         </div>
       )}
 
-      {status === 'error' && (
-        <div className="p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
-          <p className="text-red-700 dark:text-red-300 font-semibold">❌ {message}</p>
-          <p className="text-red-600 dark:text-red-400 text-xs mt-2">
-            Make sure your backend is running on http://localhost:3001
-          </p>
-        </div>
-      )}
     </div>
   );
 }
