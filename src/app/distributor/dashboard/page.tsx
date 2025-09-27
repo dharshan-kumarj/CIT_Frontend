@@ -97,6 +97,12 @@ export default function DistributorDashboard() {
               </a>
             </div>
             <div className="flex items-center gap-4">
+              <button 
+                onClick={() => router.push('/distributor/training')}
+                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105"
+              >
+                📚 Training Hub
+              </button>
               <div className="relative">
                 <button className="p-2 text-gray-400 hover:text-orange-500 transition-colors">
                   <span className="text-xl">🔔</span>
@@ -165,15 +171,19 @@ export default function DistributorDashboard() {
             </div>
           </div>
           
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm">
+          <button 
+            onClick={() => router.push('/distributor/training')}
+            className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 hover:from-purple-100 hover:to-pink-100 dark:hover:from-purple-900/30 dark:hover:to-pink-900/30 p-6 rounded-2xl shadow-sm border-2 border-transparent hover:border-purple-200 dark:hover:border-purple-800 transition-all transform hover:scale-105 text-left w-full group"
+          >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Training Progress</p>
-                <p className="text-3xl font-bold text-orange-500">{overallProgress}%</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-purple-600 dark:group-hover:text-purple-400">Training Progress</p>
+                <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{overallProgress}%</p>
+                <p className="text-xs text-purple-500 dark:text-purple-400 mt-1">🎯 Click to level up!</p>
               </div>
-              <span className="text-2xl">📚</span>
+              <span className="text-2xl group-hover:animate-bounce">📚</span>
             </div>
-          </div>
+          </button>
           
           <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm">
             <div className="flex items-center justify-between">
