@@ -54,25 +54,19 @@ export default function VendorDashboard() {
       </div>
     </div>;
   }
-  // Mock data for vendor dashboard
-  const mockDistributors = [
-    { id: 1, name: "Metro Distribution Co.", status: "active", progress: 100, contractSigned: true, slackAccess: true, location: "New York" },
-    { id: 2, name: "Regional Supply Chain", status: "training", progress: 65, contractSigned: true, slackAccess: true, location: "California" },
-    { id: 3, name: "Global Logistics Ltd", status: "pending_contract", progress: 0, contractSigned: false, slackAccess: false, location: "Texas" },
-    { id: 4, name: "FastTrack Distributors", status: "training", progress: 30, contractSigned: true, slackAccess: true, location: "Florida" },
-  ];
-
-  const mockRequests = [
-    { id: 1, product: "Smart Home Security System", datePosted: "2025-09-20", responses: 12, status: "active" },
-    { id: 2, product: "Eco-Friendly Cleaning Supplies", datePosted: "2025-09-18", responses: 8, status: "active" },
-    { id: 3, product: "Wireless Phone Chargers", datePosted: "2025-09-15", responses: 23, status: "closed" },
-  ];
-
-  const mockAlerts = [
-    { id: 1, type: "contract_pending", message: "Global Logistics Ltd hasn't signed their contract yet (3 days overdue)", urgent: true },
-    { id: 2, type: "training_stalled", message: "FastTrack Distributors training progress stalled at 30%", urgent: false },
-    { id: 3, type: "new_response", message: "New distributor interested in Smart Home Security System", urgent: false },
-  ];
+  // Extract real data from backend API response
+  const distributors = (dashboardData as any)?.partnerships || [];
+  const productRequests = (dashboardData as any)?.requests || [];
+  const notifications = (dashboardData as any)?.notifications || [];
+  const stats = (dashboardData as any)?.stats || {};
+  
+  // Transform notifications into alerts format
+  const alerts = notifications.filter((notif: any) => notif.type === 'alert').map((notif: any) => ({
+    id: notif.id,
+    type: notif.type,
+    message: notif.message,
+    urgent: notif.priority === 'high'
+  }));
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -148,13 +142,13 @@ export default function VendorDashboard() {
         )}
 
         {/* Alert Section */}
-        {mockAlerts.length > 0 && (
+        {alerts.length > 0 && (
           <div className="mb-8">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
               🚨 Things that need your attention
             </h2>
             <div className="space-y-3">
-              {mockAlerts.map((alert) => (
+              {alerts.map((alert: any) => (
                 <div
                   key={alert.id}
                   className={`p-4 rounded-xl border-l-4 ${
@@ -164,6 +158,9 @@ export default function VendorDashboard() {
                   }`}
                 >
                   <p className="text-gray-800 dark:text-gray-200">{alert.message}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {new Date(alert.createdAt).toLocaleDateString()}
+                  </p>
                 </div>
               ))}
             </div>
@@ -176,7 +173,7 @@ export default function VendorDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Active Distributors</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">4</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalPartnerships || 0}</p>
               </div>
               <span className="text-2xl">📦</span>
             </div>
@@ -185,8 +182,8 @@ export default function VendorDashboard() {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Products Listed</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">3</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Product Requests</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalRequests || 0}</p>
               </div>
               <span className="text-2xl">🛍️</span>
             </div>
@@ -195,18 +192,18 @@ export default function VendorDashboard() {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Pending Contracts</p>
-                <p className="text-3xl font-bold text-orange-500">1</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Total Notifications</p>
+                <p className="text-3xl font-bold text-orange-500">{notifications.length || 0}</p>
               </div>
-              <span className="text-2xl">📝</span>
+              <span className="text-2xl">�</span>
             </div>
           </div>
           
           <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Avg. Training Progress</p>
-                <p className="text-3xl font-bold text-green-500">65%</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Active Partnerships</p>
+                <p className="text-3xl font-bold text-green-500">{distributors.filter((d: any) => d.status === 'active').length || 0}</p>
               </div>
               <span className="text-2xl">📈</span>
             </div>
@@ -226,46 +223,56 @@ export default function VendorDashboard() {
             </div>
             
             <div className="space-y-4">
-              {mockDistributors.map((distributor) => (
-                <div key={distributor.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl">
+              {distributors.length > 0 ? distributors.map((partnership: any) => (
+                <div key={partnership.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl">
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">{distributor.name}</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{distributor.location}</p>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">
+                        {partnership.distributor?.user?.companyName || 'Unknown Company'}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {partnership.distributor?.user?.firstName} {partnership.distributor?.user?.lastName}
+                      </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      {distributor.contractSigned && <span className="text-green-500 text-sm">✓ Contract</span>}
-                      {distributor.slackAccess && <span className="text-blue-500 text-sm">💬 Slack</span>}
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        partnership.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                        partnership.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
+                        'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300'
+                      }`}>
+                        {partnership.status}
+                      </span>
                     </div>
                   </div>
                   
                   <div className="mb-2">
                     <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-gray-600 dark:text-gray-400">Training Progress</span>
-                      <span className="font-medium">{distributor.progress}%</span>
+                      <span className="text-gray-600 dark:text-gray-400">Commission Rate</span>
+                      <span className="font-medium">{partnership.commissionRate || 0}%</span>
                     </div>
                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                       <div 
                         className="bg-orange-500 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${distributor.progress}%` }}
+                        style={{ width: `${Math.min((partnership.commissionRate || 0) * 2, 100)}%` }}
                       ></div>
                     </div>
                   </div>
                   
                   <div className="flex items-center justify-between">
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      distributor.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
-                      distributor.status === 'training' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
-                      'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
-                    }`}>
-                      {distributor.status.replace('_', ' ')}
-                    </span>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Started: {new Date(partnership.createdAt).toLocaleDateString()}
+                    </div>
                     <button className="text-orange-500 hover:text-orange-600 text-sm font-medium">
                       View Details
                     </button>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <p>No distributors yet</p>
+                  <p className="text-sm">Send invitation links to get started</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -281,15 +288,19 @@ export default function VendorDashboard() {
             </div>
             
             <div className="space-y-4">
-              {mockRequests.map((request) => (
+              {productRequests.length > 0 ? productRequests.map((request: any) => (
                 <div key={request.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">{request.product}</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Posted: {request.datePosted}</p>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{request.title}</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Posted: {new Date(request.createdAt).toLocaleDateString()}
+                      </p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{request.description}</p>
                     </div>
                     <span className={`px-2 py-1 text-xs rounded-full ${
                       request.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                      request.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
                       'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300'
                     }`}>
                       {request.status}
@@ -299,16 +310,21 @@ export default function VendorDashboard() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {request.responses} distributor responses
+                        Budget: ${request.budget || 'Not specified'}
                       </span>
-                      {request.responses > 10 && <span className="text-green-500">🔥</span>}
+                      {request.urgency === 'high' && <span className="text-red-500">🔥</span>}
                     </div>
                     <button className="text-orange-500 hover:text-orange-600 text-sm font-medium">
-                      View Responses
+                      View Details
                     </button>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <p>No product requests yet</p>
+                  <p className="text-sm">Create your first request to get started</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -320,10 +336,11 @@ export default function VendorDashboard() {
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {mockDistributors
-              .sort((a, b) => b.progress - a.progress)
-              .map((distributor, index) => (
-                <div key={distributor.id} className={`p-4 rounded-xl ${
+            {distributors.length > 0 ? distributors
+              .sort((a: any, b: any) => (b.commissionRate || 0) - (a.commissionRate || 0))
+              .slice(0, 6)
+              .map((partnership: any, index: number) => (
+                <div key={partnership.id} className={`p-4 rounded-xl ${
                   index === 0 ? 'bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-300' :
                   index === 1 ? 'bg-gray-50 dark:bg-gray-700/50 border-2 border-gray-300' :
                   index === 2 ? 'bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-300' :
@@ -334,12 +351,20 @@ export default function VendorDashboard() {
                       {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '📍'}
                     </span>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 dark:text-white text-sm">{distributor.name}</h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{distributor.progress}% complete</p>
+                      <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                        {partnership.distributor?.user?.companyName || 'Unknown'}
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {partnership.commissionRate || 0}% commission
+                      </p>
                     </div>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="col-span-3 text-center py-8 text-gray-500 dark:text-gray-400">
+                  <p>No partnerships to rank yet</p>
+                </div>
+              )}
           </div>
         </div>
       </main>

@@ -54,32 +54,27 @@ export default function DistributorDashboard() {
       </div>
     </div>;
   }
-  // Mock data for distributor dashboard
-  const mockNotifications = [
-    { id: 1, vendor: "TechCorp Industries", product: "Smart Home Security System", timeAgo: "2 hours ago", type: "new_request", priority: "high" },
-    { id: 2, vendor: "EcoClean Solutions", product: "Eco-Friendly Cleaning Supplies", timeAgo: "1 day ago", type: "new_request", priority: "medium" },
-    { id: 3, vendor: "TechCorp Industries", product: "Welcome link received", timeAgo: "3 days ago", type: "welcome_link", priority: "urgent" },
-  ];
-
-  const mockContracts = [
-    { id: 1, vendor: "TechCorp Industries", product: "Smart Home Security System", status: "pending_signature", commission: "15%", dueDate: "2025-09-30" },
-    { id: 2, vendor: "GreenTech Co.", product: "Solar Panel Installation Kit", status: "signed", commission: "12%", signedDate: "2025-09-15" },
-  ];
-
-  const mockTraining = [
-    { id: 1, module: "Product Knowledge - Smart Home Systems", progress: 85, status: "in_progress", estimatedTime: "2 hours left" },
-    { id: 2, module: "Sales Techniques & Best Practices", progress: 100, status: "completed", completedDate: "2025-09-20" },
-    { id: 3, module: "Customer Support Guidelines", progress: 0, status: "not_started", estimatedTime: "4 hours" },
-    { id: 4, module: "Platform Tools & Resources", progress: 45, status: "in_progress", estimatedTime: "3 hours left" },
-  ];
-
-  const mockOpportunities = [
-    { id: 1, vendor: "MedTech Innovations", product: "Portable Health Monitors", location: "Your Region", commission: "18%", responses: 3, deadline: "2025-10-05" },
-    { id: 2, vendor: "FitGear Pro", product: "Wireless Fitness Trackers", location: "Nationwide", commission: "14%", responses: 12, deadline: "2025-10-02" },
-    { id: 3, vendor: "AutoParts Direct", product: "Electric Vehicle Chargers", location: "California", commission: "20%", responses: 7, deadline: "2025-10-08" },
-  ];
-
-  const overallProgress = Math.round(mockTraining.reduce((acc, module) => acc + module.progress, 0) / mockTraining.length);
+  // Extract real data from backend API response
+  const notifications = (dashboardData as any)?.notifications || [];
+  const partnerships = (dashboardData as any)?.partnerships || [];
+  const trainingModules = (dashboardData as any)?.training || [];
+  const opportunities = (dashboardData as any)?.opportunities || [];
+  const stats = (dashboardData as any)?.stats || {};
+  
+  // Calculate training progress
+  const overallProgress = trainingModules.length > 0 
+    ? Math.round(trainingModules.reduce((acc: number, module: any) => acc + (module.progress || 0), 0) / trainingModules.length)
+    : 0;
+    
+  // Transform partnerships into contracts format
+  const contracts = partnerships.map((partnership: any) => ({
+    id: partnership.id,
+    vendor: partnership.vendor?.user?.companyName || 'Unknown Vendor',
+    product: partnership.product || 'General Partnership',
+    status: partnership.status,
+    commission: `${partnership.commissionRate || 0}%`,
+    createdDate: partnership.createdAt
+  }));
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -164,7 +159,7 @@ export default function DistributorDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Active Partnerships</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">2</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalPartnerships || 0}</p>
               </div>
               <span className="text-2xl">🤝</span>
             </div>
@@ -194,7 +189,7 @@ export default function DistributorDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">New Opportunities</p>
-                <p className="text-3xl font-bold text-green-500">{mockOpportunities.length}</p>
+                <p className="text-3xl font-bold text-green-500">{opportunities.length}</p>
               </div>
               <span className="text-2xl">🎯</span>
             </div>
@@ -209,7 +204,7 @@ export default function DistributorDashboard() {
             </h2>
             
             <div className="space-y-4">
-              {mockNotifications.map((notification) => (
+              {notifications.length > 0 ? notifications.map((notification: any) => (
                 <div key={notification.id} className={`p-4 rounded-xl border-l-4 ${
                   notification.priority === 'urgent' ? 'bg-red-50 dark:bg-red-900/20 border-red-400' :
                   notification.priority === 'high' ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-400' :
@@ -232,7 +227,11 @@ export default function DistributorDashboard() {
                     </button>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <p>No notifications yet</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -243,7 +242,7 @@ export default function DistributorDashboard() {
             </h2>
             
             <div className="space-y-4">
-              {mockContracts.map((contract) => (
+              {contracts.length > 0 ? contracts.map((contract: any) => (
                 <div key={contract.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl">
                   <div className="flex items-start justify-between mb-3">
                     <div>
@@ -276,7 +275,11 @@ export default function DistributorDashboard() {
                     </button>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <p>No contracts yet</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -296,7 +299,7 @@ export default function DistributorDashboard() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {mockTraining.map((module) => (
+            {trainingModules.length > 0 ? trainingModules.map((module: any) => (
               <div key={module.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
@@ -337,7 +340,11 @@ export default function DistributorDashboard() {
                    module.status === 'in_progress' ? 'Continue' : 'Start Module'}
                 </button>
               </div>
-            ))}
+            )) : (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <p>No training modules available</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -348,7 +355,7 @@ export default function DistributorDashboard() {
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {mockOpportunities.map((opportunity) => (
+            {opportunities.length > 0 ? opportunities.map((opportunity: any) => (
               <div key={opportunity.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-orange-300 transition-colors">
                 <div className="mb-4">
                   <h3 className="font-semibold text-gray-900 dark:text-white text-sm">{opportunity.vendor}</h3>
@@ -375,7 +382,11 @@ export default function DistributorDashboard() {
                   Express Interest
                 </button>
               </div>
-            ))}
+            )) : (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <p>No opportunities available</p>
+              </div>
+            )}
           </div>
         </div>
       </main>
